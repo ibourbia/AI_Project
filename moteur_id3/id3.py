@@ -24,7 +24,7 @@ class ID3:
                     valeurs = set()
                     attributs[attribut] = valeurs
                 valeurs.add(valeur)
-            
+                   
         arbre = self.construit_arbre_recur(donnees, attributs)
         
         return arbre
@@ -44,7 +44,6 @@ class ID3:
         classes = list(set([d[0] for d in donnees]))
         entropies = [(a,self.h_C_A(donnees,a,attributs[a])) for a in attributs]
 
-        
         if len(donnees) == 0 : 
             return
         elif len(classes)==1:
