@@ -1,7 +1,6 @@
 from moteur_id3.id3 import ID3
 import csv
 
-filename = "train_bin.csv"
 
 class ResultValues():
 
@@ -9,6 +8,7 @@ class ResultValues():
         
         # Do computations here
         id3=ID3()
+        self.filename = str(input("nom du fichier a ouvrir"))
         # Task 1
         self.arbre = id3.construit_arbre(self.get_datas())
         # Task 3
@@ -31,7 +31,7 @@ class ResultValues():
         #the datas as a list of dictionnaries
         donnees=[]
         #open the file with encoding utf8-sig because of strange characters
-        with open(filename , newline ='\n',encoding='utf-8-sig') as datas :
+        with open(self.filename , newline ='\n',encoding='utf-8-sig') as datas :
             #retrieves datas as a reader over dictionnaries
             dict_reader=csv.DictReader(datas,delimiter=',')
             #converts each row from OrderedDict to Dictionnary
@@ -41,6 +41,7 @@ class ResultValues():
                 single_data.append(dct.pop("target"))
                 single_data.append(dct)
                 donnees.append(single_data)
+
         return donnees
 
 
