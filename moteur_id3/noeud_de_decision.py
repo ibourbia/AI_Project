@@ -5,6 +5,7 @@ class NoeudDeDecision:
         Specifically, if we can not classify a data point, we return the predominant class (see lines 53 - 56). 
     """
     niveaux = []
+    nb_enfant = []
     def __init__(self, attribut, donnees, p_class, enfants=None):
         """
             :param attribut: l'attribut de partitionnement du noeud (``None`` si\
@@ -63,6 +64,7 @@ class NoeudDeDecision:
 
         rep = ''
         self.niveaux.append(level)
+        self.nb_enfant.append(len(self.enfants) if self.enfants!= None else 0)
         if self.terminal():
             rep += '---'*level
             rep += 'Alors {}\n'.format(self.classe().upper())
