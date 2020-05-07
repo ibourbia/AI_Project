@@ -64,7 +64,6 @@ class NoeudDeDecision:
 
         rep = ''
         self.niveaux.append(level)
-        self.nb_enfant.append(len(self.enfants) if self.enfants!= None else 0)
         if self.terminal():
             rep += '---'*level
             rep += 'Alors {}\n'.format(self.classe().upper())
@@ -75,6 +74,7 @@ class NoeudDeDecision:
                 #rep += str(donnee) + '\n' 
             rep+='\n'
         else:
+            self.nb_enfant.append(len(self.enfants) if self.enfants!= None else 0)
             for valeur, enfant in self.enfants.items():
                 rep += '---'*level
                 rep += 'Si {} = {}: \n'.format(self.attribut, valeur.upper())
