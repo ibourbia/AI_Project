@@ -8,6 +8,8 @@ class ResultValues():
         # Do computations here
         id3 = ID3()
         self.filename = "train_bin.csv" #str(input("nom du fichier a ouvrir"))
+        #les faits pour les regles
+        self.faits = []
         # Task 1
         self.arbre = id3.construit_arbre(self.get_datas())
         # Task 2
@@ -58,8 +60,13 @@ class ResultValues():
         precision = 0
         if len(results) == len(results_test):
             for i, j in zip(results, results_test):
+                #on a besoin seulement du dernier element de j
                 if str(i) == j[-1]:
                     precision = precision + 1
             return (precision / total) * 100
         else:
             raise NameError("Error: number of results != number of predictions")
+
+    def get_faits(self):
+
+        return 0
