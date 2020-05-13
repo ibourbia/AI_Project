@@ -16,7 +16,6 @@ class ResultValues():
         self.faits_initiaux = None
         self.regles = []
         self.define_regles(self.arbre, [])
-
         # Task 5
         self.arbre_advance = None
 
@@ -60,6 +59,7 @@ class ResultValues():
         precision = 0
         if len(results) == len(results_test):
             for i, j in zip(results, results_test):
+                #on a besoin seulement du dernier element de j
                 if str(i) == j[-1]:
                     precision = precision + 1
             return (precision / total) * 100
