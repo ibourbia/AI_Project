@@ -67,6 +67,7 @@ class ResultValues():
         else:
             raise NameError("Error: number of results != number of predictions")
 
-    def get_faits(self):
+    def get_regles(self):
+
 
         return 0
