@@ -7,14 +7,16 @@ class ResultValues():
     def __init__(self):
         # Do computations here
         id3 = ID3()
-        self.filename = "train_bin.csv" #str(input("nom du fichier a ouvrir"))
+        self.filename = "train_bin.csv"  # str(input("nom du fichier a ouvrir"))
         # Task 1
         self.arbre = id3.construit_arbre(self.get_datas())
         # Task 2
         self.precision_rate = self.test_precision()
         # Task 3
         self.faits_initiaux = None
-        self.regles = None
+        self.regles = []
+        self.define_regles(self.arbre, [])
+
         # Task 5
         self.arbre_advance = None
 
@@ -63,3 +65,25 @@ class ResultValues():
             return (precision / total) * 100
         else:
             raise NameError("Error: number of results != number of predictions")
+
+    def define_regles(self, noeud=None, premisse=[]):
+        if noeud is None:
+            noeud = self.arbre
+        attribut = noeud.attribut
+        for cle, n in noeud.enfants.items():
+            print(attribut," : ", cle)
+            print(premisse)
+            premisse.append(str(attribut)+"-"+str(cle))
+            if n.terminal():
+                print("classe = ",n.classe())
+                regle = [premisse, n.classe()]
+                print(regle)
+                self.regles.append(regle)
+                #premisse.pop()
+                premisse = []
+                return
+            else:
+                self.define_regles(n, premisse)
+
+    def process_example(self):
+        return None
