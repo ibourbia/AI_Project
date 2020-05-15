@@ -14,7 +14,7 @@ class ResultValues():
         self.precision_rate = self.test_precision()
         # Task 3
         self.faits_initiaux = None
-        self.regles = []
+        self.regles = self.define_regles(self.arbre)
         self.define_regles(self.arbre, [])
         # Task 5
         self.arbre_advance = None
@@ -67,23 +67,35 @@ class ResultValues():
             raise NameError("Error: number of results != number of predictions")
 
     def define_regles(self, noeud=None, premisse=[]):
-        if noeud is None:
-            noeud = self.arbre
-        attribut = noeud.attribut
-        for cle, n in noeud.enfants.items():
-            print(attribut," : ", cle)
-            print(premisse)
-            premisse.append(str(attribut)+"-"+str(cle))
-            if n.terminal():
-                print("classe = ",n.classe())
-                regle = [premisse, n.classe()]
-                print(regle)
-                self.regles.append(regle)
-                #premisse.pop()
-                premisse = []
-                return
-            else:
-                self.define_regles(n, premisse)
+        """
+        Extrait les regles de l'arbre.
 
+            :param :
+            :return :
+
+        """
+        if noeud is None : 
+            noeud = self.arbre
+        
+        if noeud.terminal():
+            conclusion = str()
+            if noeud.classe()=='1':
+                conclusion = "Risque de Maladie"
+            else : 
+                conclusion = 'Pas de risque de Maladie'
+            regle = [[premisse,conclusion]]
+            return regle
+        
+        else :
+            regles =[]
+            for val,enfant in noeud.enfants.items():
+                r1=[]
+                pre_copy =premisse.copy()
+                pre_copy.append(str(noeud.attribut)+'-'+str(val))
+                r1 = self.define_regles(enfant,pre_copy)
+                regles.extend(r1)
+            return regles
+            
+        
     def process_example(self):
         return None
