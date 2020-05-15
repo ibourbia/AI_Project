@@ -13,7 +13,7 @@ class ResultValues():
         # Task 2
         self.precision_rate = self.test_precision()
         # Task 3
-        self.faits_initiaux = None
+        self.faits_initiaux = ["cp-2", "sex-1", "slope-0", "trestbps-1"]
         self.regles = self.define_regles(self.arbre)
         self.define_regles(self.arbre, [])
         # Task 5
@@ -49,6 +49,10 @@ class ResultValues():
         return donnees
 
     def test_precision(self):
+        """
+        :param: no parameters
+        :return: return the precision percentage
+        """
         donnees_test = self.get_datas("test_public_bin.csv")
         total = len(donnees_test)
         # Extraction of class value for each subject
@@ -59,7 +63,7 @@ class ResultValues():
         precision = 0
         if len(results) == len(results_test):
             for i, j in zip(results, results_test):
-                #on a besoin seulement du dernier element de j
+                # on a besoin seulement du dernier element de j
                 if str(i) == j[-1]:
                     precision = precision + 1
             return (precision / total) * 100
@@ -68,34 +72,47 @@ class ResultValues():
 
     def define_regles(self, noeud=None, premisse=[]):
         """
-        Extrait les regles de l'arbre.
-
-            :param :
-            :return :
+        Extrait les regles de l'arbre. Methode recursive. Traite les noeuds de l'arbre en recuperant les premisses et
+        en assemblant les regles
+            :param:
+            :return:
 
         """
-        if noeud is None : 
+        if noeud is None:
             noeud = self.arbre
-        
+
         if noeud.terminal():
-            conclusion = str()
-            if noeud.classe()=='1':
-                conclusion = "Risque de Maladie"
-            else : 
-                conclusion = 'Pas de risque de Maladie'
-            regle = [[premisse,conclusion]]
+            # conclusion = str()
+            # if noeud.classe()=='1':
+            #     conclusion = "Risque de Maladie"
+            # else :
+            #     conclusion = 'Pas de risque de Maladie'
+            regle = [[premisse, noeud.classe()]]
             return regle
-        
-        else :
-            regles =[]
-            for val,enfant in noeud.enfants.items():
-                r1=[]
-                pre_copy =premisse.copy()
-                pre_copy.append(str(noeud.attribut)+'-'+str(val))
-                r1 = self.define_regles(enfant,pre_copy)
+
+        else:
+            regles = []
+            for val, enfant in noeud.enfants.items():
+                r1 = []
+                pre_copy = premisse.copy()
+                pre_copy.append(str(noeud.attribut) + '-' + str(val))
+                r1 = self.define_regles(enfant, pre_copy)
                 regles.extend(r1)
             return regles
-            
-        
+
     def process_example(self):
-        return None
+        """
+        :param: prend un ensemble de faits initiaux
+        :return: retourne la règle qui a mené à la conclcusion si elle est rpésente dans l'ensemble de regles
+        retourne une liste vide si aucune regle n'a ete trouvee
+        """
+        for regle in self.regles:
+            if all(fait in regle[0] for fait in self.faits_initiaux):
+                if regle[1] == '1':
+                    print("Le patient a un risque de maladie car il rempli les conditions :", regle[0])
+                    return regle
+                if regle[1] == '0':
+                    print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", regle[0])
+                    return regle
+        print("Aucune conclusion ne peut être faite car on ne appliquer aucune de l'ensemble défini")
+        return []
