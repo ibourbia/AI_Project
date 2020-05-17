@@ -11,3 +11,4 @@ print("Precision rate of the classification tree is : ", test.precision_rate, "%
 test.define_regles()
 #print("Regles", test.regles)
 print(test.process_example())
+test.diagnostique()
