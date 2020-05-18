@@ -11,11 +11,12 @@ class ResultValues():
         # Task 1
         self.arbre = id3.construit_arbre(self.get_datas())
         # Task 2
+        self.donnees_train = self.get_datas("train_bin.csv")
         self.donnees_test = self.get_datas("test_public_bin.csv")
         self.precision_rate = self.test_precision()
         # Task 3
         # a changer si on veut vérifier autre chose
-        self.faits_initiaux = ["cp-2", "sex-1", "slope-0", "trestbps-1"]
+        self.faits_initiaux = self.define_faits_initiaux()
         self.regles = self.define_regles(self.arbre)
         self.define_regles(self.arbre, [])
         # Task 5
@@ -71,6 +72,18 @@ class ResultValues():
         else:
             raise NameError("Error: number of results != number of predictions")
 
+    def define_faits_initiaux(self):
+        donnees = [d[1] for d in self.donnees_train]
+        faits_initiaux = []
+        for d in donnees:
+            fait = []
+            for key, val in d.items():
+                fait.append(str(key)+"-"+str(val))
+            faits_initiaux.append(fait)
+        print(faits_initiaux)
+        return faits_initiaux
+
+
     def define_regles(self, noeud=None, premisse=[]):
         """
         Extrait les regles de l'arbre. Methode recursive. Traite les noeuds de l'arbre en recuperant les premisses et
@@ -80,53 +93,58 @@ class ResultValues():
             :return: regles : les regles 
 
         """
-        #au cas ou
+        # au cas ou
         if noeud is None:
             noeud = self.arbre
 
         if noeud.terminal():
-            #une regle unique instanciée lorsqu'on arrive au bout de la branche
+            # une regle unique instanciée lorsqu'on arrive au bout de la branche
             regle = [[premisse, noeud.classe()]]
             return regle
 
         else:
             regles = []
-            #recursion
+            # recursion
             for val, enfant in noeud.enfants.items():
-                #Nouvelle regle
+                # Nouvelle regle
                 r1 = []
-                #on fait une copie pour eviter les listes de liste de liste etc...
+                # on fait une copie pour eviter les listes de liste de liste etc...
                 pre_copy = premisse.copy()
                 pre_copy.append(str(noeud.attribut) + '-' + str(val))
                 r1 = self.define_regles(enfant, pre_copy)
-                #toutes les regles
+                # toutes les regles
                 regles.extend(r1)
             return regles
 
-    def process_example(self):
+    def process_example(self, example=[]):
         """
         :param: prend un ensemble de faits initiaux
         :return: retourne la règle qui a mené à la conclcusion si elle est présente dans l'ensemble de regles
         retourne une liste vide si aucune regle n'a ete trouvee
         """
-        for regle in self.regles:
-            # all() :  retourne true si toutes les propositions sont vraies
-            if all(fait in regle[0] for fait in self.faits_initiaux):
-                if regle[1] == '1':
-                    print("Le patient a un risque de maladie car il rempli les conditions :", regle[0])
-                    return regle
-                if regle[1] == '0':
-                    print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", regle[0])
-                    return regle
-        print("Aucune conclusion ne peut être faite car on ne appliquer aucune de l'ensemble défini")
-        return []
+        if len(example) == 0:
+            print("0")
+            print("Aucune conclusion ne peut être faite car liste d'entrée vide")
+            return []
+        else:
+            for regle in self.regles:
+                # all() :  retourne true si toutes les propositions sont vraies
+                if all(r in example for r in regle[0]):
+                    if regle[1] == '1':
+                        print("Le patient a un risque de maladie car il rempli les conditions :", regle[0])
+                        return regle
+                    if regle[1] == '0':
+                        print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", regle[0])
+                        return regle
+            print("1")
+            print("Aucune conclusion ne peut être faite car on ne appliquer aucune de l'ensemble défini")
+            return []
 
     def diagnostique(self):
-       #modele = les conditions des regles
-       #conclusion = la conclusion des regles
-       #premisse = les faits (on veut modifier les premisses)
+        # modele = les conditions des regles
+        # conclusion = la conclusion des regles
+        # premisse = les faits (on veut modifier les premisses)
         # for fait in self.faits_initiaux : 
         #     if len(self.process_example(fait))==0 : 
-                
-        
+
         return
