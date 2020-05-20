@@ -73,6 +73,9 @@ class ResultValues():
             raise NameError("Error: number of results != number of predictions")
 
     def define_faits_initiaux(self):
+        """
+        Creer une liste des faits initiaux a partir des donnees de train
+        """
         donnees = [d[1] for d in self.donnees_train]
         faits_initiaux = []
         for d in donnees:
@@ -116,35 +119,50 @@ class ResultValues():
                 regles.extend(r1)
             return regles
 
-    def process_example(self, example=[]):
+    def process_example(self, example=None):
         """
         :param: prend un ensemble de faits initiaux
         :return: retourne la règle qui a mené à la conclcusion si elle est présente dans l'ensemble de regles
         retourne une liste vide si aucune regle n'a ete trouvee
         """
-        if len(example) == 0:
-            print("0")
-            print("Aucune conclusion ne peut être faite car liste d'entrée vide")
+        if example is None:
             return []
         else:
             for regle in self.regles:
                 # all() :  retourne true si toutes les propositions sont vraies
+                #verifie si les conditions/premisses d'une regle sont presentes dans un fait
                 if all(r in example for r in regle[0]):
-                    if regle[1] == '1':
-                        print("Le patient a un risque de maladie car il rempli les conditions :", regle[0])
-                        return regle
-                    if regle[1] == '0':
-                        print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", regle[0])
-                        return regle
-            print("1")
+
+                    return regle
+            return []
+
+    def affiche_ccl(self, example=None):
+        """
+        :param: prend une liste d'attribut correspondant à l'état d'un patient
+        :return: affiche la conclusion et retourne la règle responsable / retourne une liste vide si aucun exemple n'est fourni
+        ou qu'aucune règle n'a pu etre trouvée
+        """
+        conclusion = self.process_example(example)
+        if example is None:
+            print("Aucun exemple fourni")
+            return []
+        if conclusion[1] == '1':
+            print("Le patient a un risque de maladie car il rempli les conditions :", regle[0])
+            return conclusion[0]
+        elif conclusion[1] == '0':
+            print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", regle[0])
+            return conclusion[0]
+        else:
             print("Aucune conclusion ne peut être faite car on ne appliquer aucune de l'ensemble défini")
             return []
 
-    def diagnostique(self):
+    def diagnostique(self, example=None):
         # modele = les conditions des regles
         # conclusion = la conclusion des regles
         # premisse = les faits (on veut modifier les premisses)
         # for fait in self.faits_initiaux : 
-        #     if len(self.process_example(fait))==0 : 
-
-        return
+        #     if len(self.process_example(fait))==0 :
+        if example is None:
+            print("Aucun exemple fourni")
+            return []
+        
