@@ -1,6 +1,7 @@
 from project import ResultValues
 from moteur_id3.noeud_de_decision import NoeudDeDecision
 from statistics import mean
+from moteur_id3.id3_advance import ID3Advance
 
 test = ResultValues()
 print(test.arbre)
@@ -18,3 +19,7 @@ print("Variables à modifier : ", liste)
 for fait in test.faits_initiaux:
     print(test.diagnostique(fait))
 print(test.attributs)
+
+testounet=ID3Advance()
+attributs = testounet.attributs(test.donnees_train)
+testounet.construit_arbre_advance(test.donnees_train)
