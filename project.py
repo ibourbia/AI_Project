@@ -2,6 +2,25 @@ from moteur_id3.id3 import ID3
 import csv
 
 
+def abduction_element(liste, abduct):
+    """
+    :param liste: liste à traiter
+    :param abduct: liste d'element à retirer de :liste:
+    :return: liste abductée des éléments de :abduct:
+    """
+    update = []
+    for e in liste:
+        flag = False
+        for a in abduct:
+            if a in e:
+                flag = True
+                # print("abduct", e)
+                break
+        if not flag:
+            update.append(e)
+    return update
+
+
 class ResultValues():
 
     def __init__(self):
@@ -15,10 +34,10 @@ class ResultValues():
         self.donnees_test = self.get_datas("test_public_bin.csv")
         self.precision_rate = self.test_precision()
         # Task 3
-        # a changer si on veut vérifier autre chose
         self.faits_initiaux = self.define_faits_initiaux()
         self.regles = self.define_regles(self.arbre)
         self.define_regles(self.arbre, [])
+        self.attributs = self.get_attributs()
         # Task 5
         self.arbre_advance = None
 
@@ -51,6 +70,12 @@ class ResultValues():
 
         return donnees
 
+    def get_attributs(self):
+        attributs = []
+        for k in self.donnees_train[0][1].keys():
+            attributs.append(k)
+        return attributs
+
     def test_precision(self):
         """
         :param: no parameters
@@ -81,11 +106,10 @@ class ResultValues():
         for d in donnees:
             fait = []
             for key, val in d.items():
-                fait.append(str(key)+"-"+str(val))
+                fait.append(str(key) + "-" + str(val))
             faits_initiaux.append(fait)
         print(faits_initiaux)
         return faits_initiaux
-
 
     def define_regles(self, noeud=None, premisse=[]):
         """
@@ -130,39 +154,103 @@ class ResultValues():
         else:
             for regle in self.regles:
                 # all() :  retourne true si toutes les propositions sont vraies
-                #verifie si les conditions/premisses d'une regle sont presentes dans un fait
+                # verifie si les conditions/premisses d'une regle sont presentes dans un fait
                 if all(r in example for r in regle[0]):
-
+                    # print('1')
                     return regle
+            # print('0')
             return []
 
     def affiche_ccl(self, example=None):
         """
+        Méthode affichant la conclusion de l'exemple traité
         :param: prend une liste d'attribut correspondant à l'état d'un patient
         :return: affiche la conclusion et retourne la règle responsable / retourne une liste vide si aucun exemple n'est fourni
         ou qu'aucune règle n'a pu etre trouvée
         """
-        conclusion = self.process_example(example)
         if example is None:
             print("Aucun exemple fourni")
             return []
-        if conclusion[1] == '1':
-            print("Le patient a un risque de maladie car il rempli les conditions :", regle[0])
-            return conclusion[0]
-        elif conclusion[1] == '0':
-            print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", regle[0])
-            return conclusion[0]
-        else:
+        conclusion = self.process_example(example)
+        if len(conclusion) == 0:
             print("Aucune conclusion ne peut être faite car on ne appliquer aucune de l'ensemble défini")
             return []
+        elif conclusion[1] == '1':
+            print("Le patient a un risque de maladie car il rempli les conditions :", conclusion[0])
+            return conclusion[0]
+        elif conclusion[1] == '0':
+            print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", conclusion[0])
+            return conclusion[0]
 
     def diagnostique(self, example=None):
-        # modele = les conditions des regles
-        # conclusion = la conclusion des regles
-        # premisse = les faits (on veut modifier les premisses)
-        # for fait in self.faits_initiaux : 
-        #     if len(self.process_example(fait))==0 :
+        """
+        :param example: une liste correspondant aux caractéristiques d'un patient
+        :return: retourne une liste  de listes de tuples comprenant (attribut-valeur, attribut-nouvelle_valeur).
+        Chaque sous liste correspond aux changements qu'il faudrait faire pour correspondre à une règle ayant la conclusion '0'
+        """
+        # Construction de l'ensemble de premisse qui mène à la conclusion '0'
+        non_P = [r[0] for r in self.regles if r[1] == '0']
+
         if example is None:
             print("Aucun exemple fourni")
             return []
-        
+        # On obtient la regle qui mene qui traite l'exemple
+        regle = self.process_example(example)
+        if len(regle) == 0:
+            return []
+        else:
+            premisses = regle[0]
+            conclusion = regle[1]
+            age = None
+            sex = None
+            for element in example:
+                if 'age' in element:
+                    age = element
+                if 'sex' in element:
+                    sex = element
+            if conclusion == '1':
+                # Isolation des regles avec une conclusion '1' les plus proches des premisses de l'exemple
+                predicats_positif = []
+                pre = premisses.copy()
+                pre.pop()
+                for p in non_P:
+                    q = p.copy()
+                    while len(q) > 0:
+                        q.pop()
+                        if all(e in pre for e in q):
+                            predicats_positif.append(p)
+                # On retire tous les predicats comportant un changement de 'sex' ou de 'age'
+                predicats = []
+                if age is not None and sex is not None:
+                    for p in predicats_positif:
+                        if all('age' not in e for e in p) and all('sex' not in e for e in p):
+                            predicats.append(p)
+                        if age in p and sex in p:
+                            predicats.append(p)
+                        if age in p and all('sex' not in e for e in p):
+                            predicats.append(p)
+                        if sex in p and all('age' not in e for e in p):
+                            predicats.append(p)
+                # Construction d'une liste stockant tous les changements possibles
+                variables = []
+                for p in predicats:
+                    l = []
+                    for att in self.attributs:
+                        if att == 'sex' or att == 'age':
+                            pass
+                        else:
+                            for pre in example:
+                                for el in p:
+                                    if att in el and att in pre:
+                                        if el != pre:
+                                            l.append((pre, el))
+                    if len(l) > 0:
+                        variables.append(l)
+
+                #print("Patient : ", premisses, example)
+                #print("VAR : ", variables)
+                #print("Liste des modifications")
+                return variables
+            elif conclusion == '0':
+                print("La prédiction ne mène à aucune maladie")
+                return []
