@@ -8,16 +8,7 @@ class ID3:
         Specifically, in construit_arbre_recur(), if donnees == [] (line 70), it returns a terminal node with the predominant class of the dataset -- as computed in construit_arbre() -- instead of returning None.
         Moreover, the predominant class is also passed as a parameter to NoeudDeDecision().
     """
-    
-    def construit_arbre(self, donnees):
-        """ Construit un arbre de décision à partir des données d'apprentissage.
-
-            :param list donnees: les données d'apprentissage\
-            ``[classe, {attribut -> valeur}, ...]``.
-            :return: une instance de NoeudDeDecision correspondant à la racine de\
-            l'arbre de décision.
-        """
-        
+    def attributs(self,donnees):
         # Nous devons extraire les domaines de valeur des 
         # attributs, puisqu'ils sont nécessaires pour 
         # construire l'arbre.
@@ -29,6 +20,18 @@ class ID3:
                     valeurs = set()
                     attributs[attribut] = valeurs
                 valeurs.add(valeur)
+        return attributs
+
+    
+    def construit_arbre(self, donnees):
+        """ Construit un arbre de décision à partir des données d'apprentissage.
+
+            :param list donnees: les données d'apprentissage\
+            ``[classe, {attribut -> valeur}, ...]``.
+            :return: une instance de NoeudDeDecision correspondant à la racine de\
+            l'arbre de décision.
+        """
+        attributs = self.attributs(donnees)
 
         # Find the predominant class
         classes = set([row[0] for row in donnees])
@@ -97,6 +100,16 @@ class ID3:
                                                              predominant_class)
 
             return NoeudDeDecision(attribut, donnees, str(predominant_class), enfants)
+    
+    def construit_arbre_advance(self,donnees) : 
+        attributs = self.attributs(donnees)
+
+        return
+    
+    def construit_arbre_advance_recur(self,donnees,attributs):
+        h_C = [self.h_C(donnees)]
+        return
+
 
     def partitionne(self, donnees, attribut, valeurs):
         """ Partitionne les données sur les valeurs a_j de l'attribut A.
@@ -207,3 +220,30 @@ class ID3:
                    for valeur in valeurs]
 
         return sum([p_aj * h_c_aj for p_aj, h_c_aj in zip(p_ajs, h_c_ajs)])
+
+    def p_ci(self,donnees,classe):
+        """
+        p(ci) =  la probabilité que la classe C ait la valeur ci parmis les données
+
+            :param donnees : les donnnees d'apprentissage
+            :param classe :  la valeur ci de la classe
+            :return: p(ci)
+        """
+        nombre_donnees = len(donnees)
+        donnees_ci = [donnee for donnee in donnees if donnee[0]==classe]
+        nombre_ci = len(donnees_ci)
+
+        return nombre_ci/nombre_donnees
+    
+    def h_C(self,donnees):
+        """
+        H(C) = l'entropie de la classe C
+
+            :param donnnes : les donnees d'apprentissage
+            :return: H(C)
+        """
+        classes = list(set([donnee[0] for donnee in donnees]))
+        p_cis = [self.p_ci(donnees,classe) for classe in classes]
+        
+        return -sum(p_ci * log(p_ci) for p_ci in p_cis)
+        
