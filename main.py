@@ -18,8 +18,8 @@ liste = test.diagnostique(["cp-1", "age-3", "chol-1", "ca-3", "sex-0"])
 print("Variables à modifier : ", liste)
 for fait in test.faits_initiaux:
     print(test.diagnostique(fait))
-print(test.attributs)
+
 
 testounet=ID3Advance()
 attributs = testounet.attributs(test.donnees_train)
-testounet.construit_arbre_advance(test.donnees_train)
+testounet.construit_arbre_advance(test.donnees_train_continuous)

@@ -39,17 +39,37 @@ class ID3Advance:
             h_C_As_attribs = [(self.h_C_A(donnees, attribut, attributs[attribut]), 
                                attribut) for attribut in attributs]
             attribut = min(h_C_As_attribs, key=lambda h_a: h_a[0])[1]
+            valeurs_attribut = self.valeurs_attribut(attributs[attribut])
+            print("VALEURS : ",valeurs_attribut)
+            print("ATTRIBUT ", attribut)
             
             #maximisation du gain : 
             h_c_attrib =[]
+            print("ATTRIBUTS DATTRIBUTS", attributs[attribut])
             for sets in attributs[attribut]: 
                 set_iterator = iter(sets)
-                h_c_attrib.append( (next(set_iterator),self.h_C(donnees,next(set_iterator))))
+                valeur = next(set_iterator)
+                classe= next(set_iterator)
+                h_c_attrib.append([[valeur,classe],self.h_C(donnees,classe)])
             
-            attribut_max=
+            gains  = [[h_c[1] - self.h_C_A(donnees,attribut,valeurs_attribut)/abs(len(valeurs_attribut)),h_c[0]] for h_c in h_c_attrib]
+
+            valeur_max1 = max(gains,key=lambda gain: gain[0])[1]
+            print("GAINS",gains)
+            print("HC ATTRIB",h_c_attrib)
+           
 
 
         return
+
+    def valeurs_attribut(self,attribut):
+        """Retourne une liste des valeurs d'un attribut
+        """
+        valeurs = []
+        for sets in attribut : 
+            set_iterator=iter(sets)
+            valeurs.append(next(set_iterator))
+        return valeurs
     
     def attributs(self,donnees):
         # Nous devons extraire les domaines de valeur des 
@@ -64,7 +84,6 @@ class ID3Advance:
                     valeurs = set()
                     attributs[attribut] = valeurs
                 valeurs.add((valeur,classe))
-        print("ATTRIBUTS ID3", attributs)
         return attributs
 
     
