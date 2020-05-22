@@ -20,6 +20,7 @@ for fait in test.faits_initiaux:
     print(test.diagnostique(fait))
 
 
-testounet=ID3Advance()
-attributs = testounet.attributs(test.donnees_train)
-testounet.construit_arbre_advance(test.donnees_train_continuous)
+# testounet=ID3Advance()
+# attributs = testounet.attributs(test.donnees_train)
+# testounet.construit_arbre(test.donnees_train_continuous)
+# testounet.partitionne(test.donnees_train_continuous,"age",testounet.attributs(test.donnees_train_continuous)["age"],57)
