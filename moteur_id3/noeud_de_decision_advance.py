@@ -34,6 +34,7 @@ class NoeudDeDecisionAdvance:
         """
 
         if self.terminal():
+            print("KESSEKETA ENCORE ",self.donnees)
             return self.donnees[0][0]
 
     def classifie(self, donnee):

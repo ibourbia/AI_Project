@@ -1,4 +1,6 @@
 from moteur_id3.id3 import ID3
+from moteur_id3.id3_advance import ID3Advance
+from moteur_id3.noeud_de_decision_advance import NoeudDeDecisionAdvance
 import csv
 
 
@@ -26,6 +28,7 @@ class ResultValues():
     def __init__(self):
         # Do computations here
         id3 = ID3()
+        id3Advance=ID3Advance()
         self.filename = "train_bin.csv"  # str(input("nom du fichier a ouvrir"))
         # Task 1
         self.arbre = id3.construit_arbre(self.get_datas())
@@ -40,7 +43,7 @@ class ResultValues():
         self.attributs = self.get_attributs()
         # Task 5
         self.donnees_train_continuous = self.get_datas("train_continuous.csv")
-        self.arbre_advance = None
+        self.arbre_advance = id3Advance.construit_arbre(self.donnees_train_continuous)
 
     def get_results(self):
         return [self.arbre, self.faits_initiaux, self.regles, self.arbre_advance]
