@@ -42,7 +42,7 @@ class ResultValues():
         self.define_regles(self.arbre, [])
         self.attributs = self.get_attributs()
         # Task 5
-        self.donnees_train_continuous = self.get_datas("train_continuous.csv")
+        self.donnees_train_continuous = self.get_datas("test_public_continuous.csv")
         self.arbre_advance = id3Advance.construit_arbre(self.donnees_train_continuous)
 
     def get_results(self):

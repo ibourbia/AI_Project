@@ -4,47 +4,73 @@ from .noeud_de_decision_advance import NoeudDeDecisionAdvance
 class ID3Advance(ID3):
     """
     """
-    def construit_arbre_recur(self,donnees,attributs,predominant_class):
+    def construit_arbre_recur(self,donnees,attributs,predominant_class,attribut_optimal_recur=None):
         def classe_unique(donnees):
             """ Vérifie que toutes les données appartiennent à la même classe. """
             
             if len(donnees) == 0:
-                return True 
+                return True
             premiere_classe = donnees[0][0]
             for donnee in donnees:
-                print("LES CLASSES DES DONNEES",donnee[0])
+                # print("LES CLASSES DES DONNEES",donnee[0])
                 if donnee[0] != premiere_classe:
                     return False 
             return True
-        if classe_unique(donnees):
-            print("UNIQUEEEEEEE")
-            return NoeudDeDecisionAdvance(None, donnees, str(predominant_class))
-        elif len(donnees)==0:
-            print("TRUEEEEEEEEEEEEEE")
+        # print("LES DONNEES:",donnees)
+        if len(donnees)==0:
+            # print("TRUEEEEEEEEEEEEEE")
             return NoeudDeDecisionAdvance(None, [str(predominant_class), dict()], str(predominant_class))
+        elif classe_unique(donnees):
+            # print("UNIQUEEEEEEE")
+            return NoeudDeDecisionAdvance(None, donnees, str(predominant_class))
         else : 
             #1 : trouver l'attribut et sa valeur minimisant l'entropie
             attribut_optimal = self.attribut_optimal(donnees,attributs)
-            attributs_valeurs_restantes = attributs.copy()
-            attributs_valeurs_restantes[attribut_optimal[0]].remove(attribut_optimal[1])
-            print("ATTRIBUT OPTIMAL",attribut_optimal)
-            print("ATTRIBUTS RESTANTS",attributs_valeurs_restantes)
+            if attribut_optimal==attribut_optimal_recur:
+                return NoeudDeDecisionAdvance(None,donnees,str(predominant_class))
+            # attributs_valeurs_restantes = attributs.copy()
+            # attributs_valeurs_restantes[attribut_optimal[0]].remove(attribut_optimal[1])
+            # print("ATTRIBUT OPTIMAL",attribut_optimal)
+            # print("ATTRIBUTS RESTANTS",attributs_valeurs_restantes)
             
-            partitions_dict=self.partitionne(donnees,attribut_optimal[0],attributs_valeurs_restantes[attribut_optimal[0]], attribut_optimal[1])
-            partitions= [partitions_dict["Droite"],partitions_dict["Gauche"]]
+            partitions_dict=self.partitionne(donnees,attribut_optimal[0],attributs[attribut_optimal[0]], attribut_optimal[1])
+            # partitions= [partitions_dict["Droite"],partitions_dict["Gauche"]]
+            # print("PARTITION DICT",partitions_dict)
 
             enfants = {}
-            for partition in partitions : 
-                for valeur, partition in partition.items():
-                    print("NIQUE SA RACEEEEEEEEEEEEEEEEE",partition)
-                    enfants[valeur] = self.construit_arbre_recur(partition,
-                                                             attributs_valeurs_restantes,
-                                                             predominant_class)
+            for side,partition in partitions_dict.items():
+                # print("SIDE",side)
+                if side == "Droite":
+                    donnees_droite=self.donnees_partition(partition.values())
+                    # print("DONNEES DROITE",donnees_droite)
+                    attributs_droite=self.attributs(donnees_droite)
+                    # print("ATTRIBUTS DROITS",attributs_droite)
+                    enfants[attribut_optimal[1]]=self.construit_arbre_recur(donnees_droite,attributs_droite,predominant_class,attribut_optimal)
+                elif side=="Gauche":
+                    donnees_gauche=self.donnees_partition(partition.values())
+                    # print("DONNNES GAUCHE", donnees_gauche)
+                    attributs_gauche=self.attributs(donnees_gauche)
+                    # print("ATTRIBUTS GAUCHE",attributs_gauche)
+                    nouvelle_val_part=self.valeur_max(donnees_gauche,attribut_optimal[0],attributs_gauche)
+                    # print("NOUVELE VAL PART",nouvelle_val_part)
+                    enfants[nouvelle_val_part]=self.construit_arbre_recur(donnees_gauche,attributs_gauche,predominant_class,attribut_optimal)
 
-                return NoeudDeDecisionAdvance(attribut_optimal[0], donnees, str(predominant_class), enfants)
+            return NoeudDeDecisionAdvance(attribut_optimal[0], donnees, str(predominant_class), enfants)
 
-    
-    
+    def valeur_max(self,donnees,attribut,attributs):
+        """
+        Cherche la valeur maximale pour un seul attribut
+        """
+        val_max=str()
+        for value in attributs[attribut]:
+            valeur_max=-100000.0
+            valeur_courante=float(value)
+            if valeur_courante>valeur_max:
+                valeur_max=valeur_courante
+                val_max=str(valeur_max)
+        return val_max
+        
+
     def attribut_optimal(self,donnees,attributs):
         """
         Cherche l'attribut et sa valeur qui minimisent l'entropie
@@ -68,7 +94,6 @@ class ID3Advance(ID3):
             entropies_attributs.append((entropie_minimale,(attribut,valeur_partitionnement)))
         
         attribut_optimal=min(entropies_attributs, key=lambda h_c_a:h_c_a[0])[1]
-        # print("ATTRIBUT OPTIMAL",attribut_optimal)
         
         return attribut_optimal
     
@@ -85,6 +110,8 @@ class ID3Advance(ID3):
         """
         partitions_droite = {valeur: [] for valeur in valeurs if float(valeur) >= float(valeur_partitionnement)}
         partitions_gauche = {valeur: [] for valeur in valeurs if float(valeur) < float(valeur_partitionnement)}
+        # print("PARTITION DROITE",partitions_droite.keys())
+        # print("PARTITION GAUCHE", partitions_gauche.keys())
          
         for donnee in donnees : 
             if float(donnee[1][attribut])>=float(valeur_partitionnement):
@@ -94,8 +121,7 @@ class ID3Advance(ID3):
                 partition_gauche=partitions_gauche[donnee[1][attribut]]
                 partition_gauche.extend([donnee])
         
-        partitions = {"Droite":partitions_gauche,"Gauche":partitions_droite}
-        # print("PARTITIONS ", partitions)
+        partitions = {"Droite":partitions_droite,"Gauche":partitions_gauche}
         return partitions
 
     def p_aj(self,partition):
@@ -114,58 +140,60 @@ class ID3Advance(ID3):
             return 0.0
         else: 
             p_aj=nombre_donnees_droite/(nombre_donnees_droite+nombre_donnees_gauche)
-        
         return p_aj
     
+    def donnees_partition(self,partition):
+        """
+        Retourne les donnees d'une partition
+
+        """
+        donnees_part=[donnees_liste for donnees_liste in partition]
+        donnees_partition=list()
+        for donnees in donnees_part:
+            for d in donnees : 
+                donnees_partition.extend([d])
+
+        return donnees_partition
+
     def p_ci_aj(self, donnees,attribut,valeurs,valeur_partitionnement,classe):
         """
         p(ci|aj) =  la probabilité que la classe soit ci sachant que aj>=valeur_partitionnement (droite)
         ou aj<valeur_partitionnement (gauche)
             :param:
         """
-        donnees_droite=list()
-        donnees_gauche=list()
+        # donnees_droite=list()
+        # donnees_gauche=list()
         partition = self.partitionne(donnees, attribut, valeurs,valeur_partitionnement)
         partition_droite=partition["Droite"].values()
         partition_gauche=partition["Gauche"].values()
 
         
-        donnees_droite=[donnees_liste for donnees_liste in partition_droite]
-        donnees_gauche=[donnees_liste for donnees_liste in partition_gauche]
-        donnee_droite=list()
-        donnee_gauche=list()
+        donnees_droite=self.donnees_partition(partition_droite)
+        donnees_gauche=self.donnees_partition(partition_gauche)
+        
+        # print("DONNEES DROITES", donnees_droite)
+        # print("DONNEES GAUCHE", donnees_gauche)
 
-        for donnees in donnees_droite:
-            for d in donnees : 
-                donnee_droite.extend([d])
-        for donnees in donnees_gauche:
-            for d in donnees:
-                donnee_gauche.extend([d])
-        # print("DONNEES DROITES", donnee_droite)
-        # print("DONNEES GAUCHE", donnee_gauche)
-
-        nombre_donnees_droite = len(donnee_droite)
-        nombre_donnees_gauche = len(donnee_gauche)
+        nombre_donnees_droite = len(donnees_droite)
+        nombre_donnees_gauche = len(donnees_gauche)
         # print("NOMBRE DONNEES DROITE", nombre_donnees_droite)
         # print("NOMBRE DONNEES GAUCHE ", nombre_donnees_gauche)
         #calcul de la probabilité de ci en fonction du côté droit ou gauche
-        donnees_ci_gauche = [donnee for donnee in donnee_droite if donnee[0]==classe]
-        donnees_ci_droite = [donnee for donnee in donnee_gauche if donnee[0]==classe]
+        donnees_ci_gauche = [donnee for donnee in donnees_gauche if donnee[0]==classe]
+        donnees_ci_droite = [donnee for donnee in donnees_droite if donnee[0]==classe]
         
         nombre_ci_droite = len(donnees_ci_droite)
         nombre_ci_gauche = len(donnees_ci_gauche)
         # print("DONNEES DROITES CI", donnees_ci_droite)
         # print("NOMBRE DONNEES DROITES CI", nombre_ci_droite)
+        # print("NOMBRE DONNEES GAUCHES CI",nombre_ci_gauche)
 
         #a droite
         p_ci_aj_droite= nombre_ci_droite/nombre_donnees_droite if nombre_donnees_droite!=0.0 else 0.0
         #a gauche
         p_ci_aj_gauche=nombre_ci_gauche/nombre_donnees_gauche if nombre_donnees_gauche!=0.0 else 0.0
-        # print("PCIAJDROITE",p_ci_aj_droite)
-        # print("PCIAJGAUCHE", p_ci_aj_gauche)
 
         probabilites={"Gauche":p_ci_aj_gauche,"Droite": p_ci_aj_droite}
-        
         return probabilites
 
     def h_C_aj(self,donnees,attribut,valeurs,valeur_partitionnement):
@@ -193,6 +221,6 @@ class ID3Advance(ID3):
         h_c_aj=self.h_C_aj(donnees,attribut,valeurs,valeur_partitionnement)
         p_aj=self.p_aj(partition)
      
-        h_c_a = -h_c_aj["Gauche"]*(1-p_aj) -h_c_aj["Droite"]*p_aj
+        h_c_a = h_c_aj["Gauche"]*(1-p_aj) + h_c_aj["Droite"]*p_aj
 
         return h_c_a
