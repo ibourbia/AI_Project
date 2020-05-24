@@ -256,5 +256,5 @@ class ResultValues():
                 #print("Liste des modifications")
                 return variables
             elif conclusion == '0':
-                print("La prédiction ne mène à aucune maladie")
+                #print("La prédiction ne mène à aucune maladie")
                 return []

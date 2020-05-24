@@ -18,8 +18,16 @@ print("Nombre d'enfants moyen", mean(NoeudDeDecision.nb_enfant))
 # print(test.affiche_ccl(["cp-1", "age-3", "chol-1", "ca-3", "sex-0"]))
 # liste = test.diagnostique(["cp-1", "age-3", "chol-1", "ca-3", "sex-0"])
 # print("Variables à modifier : ", liste)
-# for fait in test.faits_initiaux:
-#     print(test.diagnostique(fait))
+i = 0
+j = len(test.faits_initiaux)
+for fait in test.faits_initiaux:
+    diag = test.diagnostique(fait)
+    for e in diag:
+        if len(e) == 2 or len(e) == 1:
+            i = i + 1
+            break
+print("On trouve ", i," patients dont on peut modifier 1 ou 2 parametres parmi ", j, " patients")
+
 print("Arbre ID3 Advance")
 print(test.arbre_advance)
 print("Profondeur maximale = ", max(NoeudDeDecisionAdvance.niveaux))
