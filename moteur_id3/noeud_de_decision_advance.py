@@ -77,9 +77,11 @@ class NoeudDeDecisionAdvance:
             self.nb_enfant.append(len(self.enfants) if self.enfants!= None else 0)
             for valeur, enfant in self.enfants.items():
                 rep += '---'*level
-                rep += 'Si {} = {}: \n'.format(self.attribut, valeur.upper())
+                if valeur[0]=="Droite":
+                    rep += 'Si {} >= {}: \n'.format(self.attribut, valeur[1].upper())
+                elif valeur[0]=="Gauche":
+                    rep += 'Si {} < {}: \n'.format(self.attribut, valeur[1].upper())
                 rep += enfant.repr_arbre(level+1)
-
         return rep
 
     def __repr__(self):

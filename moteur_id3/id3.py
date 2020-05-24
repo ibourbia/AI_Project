@@ -35,14 +35,11 @@ class ID3:
 
         # Find the predominant class
         classes = set([row[0] for row in donnees])
-        # print(classes)
         predominant_class_counter = -1
         for c in classes:
-            # print([row[0] for row in donnees].count(c))
             if [row[0] for row in donnees].count(c) >= predominant_class_counter:
                 predominant_class_counter = [row[0] for row in donnees].count(c)
                 predominant_class = c
-        # print("la clsse prédominante est ",predominant_class)
             
         arbre = self.construit_arbre_recur(donnees, attributs, predominant_class)
 

@@ -16,7 +16,7 @@ def abduction_element(liste, abduct):
         for a in abduct:
             if a in e:
                 flag = True
-                # print("abduct", e)
+                #  ("abduct", e)
                 break
         if not flag:
             update.append(e)

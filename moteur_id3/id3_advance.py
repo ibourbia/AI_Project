@@ -4,7 +4,7 @@ from .noeud_de_decision_advance import NoeudDeDecisionAdvance
 class ID3Advance(ID3):
     """
     """
-    def construit_arbre_recur(self,donnees,attributs,predominant_class,attribut_optimal_recur=None):
+    def construit_arbre_recur(self,donnees,attributs,predominant_class,attribut_optimal_recur=None,):
         def classe_unique(donnees):
             """ Vérifie que toutes les données appartiennent à la même classe. """
             
@@ -12,49 +12,32 @@ class ID3Advance(ID3):
                 return True
             premiere_classe = donnees[0][0]
             for donnee in donnees:
-                # print("LES CLASSES DES DONNEES",donnee[0])
                 if donnee[0] != premiere_classe:
                     return False 
             return True
-        # print("LES DONNEES:",donnees)
+
         if len(donnees)==0:
-            # print("TRUEEEEEEEEEEEEEE")
             return NoeudDeDecisionAdvance(None, [str(predominant_class), dict()], str(predominant_class))
         elif classe_unique(donnees):
-            # print("UNIQUEEEEEEE")
             return NoeudDeDecisionAdvance(None, donnees, str(predominant_class))
         else : 
             #1 : trouver l'attribut et sa valeur minimisant l'entropie
             attribut_optimal = self.attribut_optimal(donnees,attributs)
             if attribut_optimal==attribut_optimal_recur:
                 return NoeudDeDecisionAdvance(None,donnees,str(predominant_class))
-            # attributs_valeurs_restantes = attributs.copy()
-            # attributs_valeurs_restantes[attribut_optimal[0]].remove(attribut_optimal[1])
-            # print("ATTRIBUT OPTIMAL",attribut_optimal)
-            # print("ATTRIBUTS RESTANTS",attributs_valeurs_restantes)
             
             partitions_dict=self.partitionne(donnees,attribut_optimal[0],attributs[attribut_optimal[0]], attribut_optimal[1])
-            # partitions= [partitions_dict["Droite"],partitions_dict["Gauche"]]
-            # print("PARTITION DICT",partitions_dict)
 
             enfants = {}
             for side,partition in partitions_dict.items():
-                # print("SIDE",side)
                 if side == "Droite":
                     donnees_droite=self.donnees_partition(partition.values())
-                    # print("DONNEES DROITE",donnees_droite)
                     attributs_droite=self.attributs(donnees_droite)
-                    # print("ATTRIBUTS DROITS",attributs_droite)
-                    enfants[attribut_optimal[1]]=self.construit_arbre_recur(donnees_droite,attributs_droite,predominant_class,attribut_optimal)
+                    enfants[(side,attribut_optimal[1])]=self.construit_arbre_recur(donnees_droite,attributs_droite,predominant_class,attribut_optimal)
                 elif side=="Gauche":
                     donnees_gauche=self.donnees_partition(partition.values())
-                    # print("DONNNES GAUCHE", donnees_gauche)
                     attributs_gauche=self.attributs(donnees_gauche)
-                    # print("ATTRIBUTS GAUCHE",attributs_gauche)
-                    nouvelle_val_part=self.valeur_max(donnees_gauche,attribut_optimal[0],attributs_gauche)
-                    # print("NOUVELE VAL PART",nouvelle_val_part)
-                    enfants[nouvelle_val_part]=self.construit_arbre_recur(donnees_gauche,attributs_gauche,predominant_class,attribut_optimal)
-
+                    enfants[(side,attribut_optimal[1])]=self.construit_arbre_recur(donnees_gauche,attributs_gauche,predominant_class,attribut_optimal)
             return NoeudDeDecisionAdvance(attribut_optimal[0], donnees, str(predominant_class), enfants)
 
     def valeur_max(self,donnees,attribut,attributs):
