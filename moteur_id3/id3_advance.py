@@ -26,8 +26,8 @@ class ID3Advance(ID3):
         else:
             # 1 : trouver l'attribut et sa valeur minimisant l'entropie
             attribut_optimal = self.attribut_optimal(donnees, attributs)
-            # if attribut_optimal == attribut_optimal_recur:
-            #     return NoeudDeDecisionAdvance(None, None, donnees, str(predominant_class))
+            if attribut_optimal == attribut_optimal_recur:
+                return NoeudDeDecisionAdvance(None, None, donnees, str(predominant_class))
 
             partitions_dict = self.partitionne(donnees, attribut_optimal[0], attributs[attribut_optimal[0]],
                                                attribut_optimal[1])
@@ -46,19 +46,6 @@ class ID3Advance(ID3):
                                                                attribut_optimal)
             return NoeudDeDecisionAdvance(attribut_optimal[0], attribut_optimal[1], donnees, str(predominant_class),
                                           enfants)
-
-    def valeur_max(self, donnees, attribut, attributs):
-        """
-        Cherche la valeur maximale pour un seul attribut
-        """
-        val_max = str()
-        for value in attributs[attribut]:
-            valeur_max = -100000.0
-            valeur_courante = float(value)
-            if valeur_courante > valeur_max:
-                valeur_max = valeur_courante
-                val_max = str(valeur_max)
-        return val_max
 
     def attribut_optimal(self, donnees, attributs):
         """
