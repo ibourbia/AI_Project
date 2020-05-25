@@ -3,47 +3,29 @@ from moteur_id3.id3_advance import ID3Advance
 from moteur_id3.noeud_de_decision_advance import NoeudDeDecisionAdvance
 import csv
 
-
-def abduction_element(liste, abduct):
-    """
-    :param liste: liste à traiter
-    :param abduct: liste d'element à retirer de :liste:
-    :return: liste abductée des éléments de :abduct:
-    """
-    update = []
-    for e in liste:
-        flag = False
-        for a in abduct:
-            if a in e:
-                flag = True
-                #  ("abduct", e)
-                break
-        if not flag:
-            update.append(e)
-    return update
-
-
 class ResultValues():
 
     def __init__(self):
         # Do computations here
         id3 = ID3()
-        id3Advance=ID3Advance()
+        id3Advance = ID3Advance()
         self.filename = "train_bin.csv"  # str(input("nom du fichier a ouvrir"))
         # Task 1
         self.arbre = id3.construit_arbre(self.get_datas())
         # Task 2
         self.donnees_train = self.get_datas("train_bin.csv")
         self.donnees_test = self.get_datas("test_public_bin.csv")
-        self.precision_rate = self.test_precision()
+        self.precision_rate = self.test_precision(self.arbre)
         # Task 3
         self.faits_initiaux = self.define_faits_initiaux()
         self.regles = self.define_regles(self.arbre)
         self.define_regles(self.arbre, [])
         self.attributs = self.get_attributs()
         # Task 5
-        self.donnees_train_continuous = self.get_datas("test_public_continuous.csv")
+        self.donnees_train_continuous = self.get_datas("train_continuous.csv")
+        self.donnees_test_continuous = self.get_datas("test_public_continuous.csv")
         self.arbre_advance = id3Advance.construit_arbre(self.donnees_train_continuous)
+        self.precision_rate_advance = self.test_precision(self.arbre_advance, self.donnees_test_continuous)
 
     def get_results(self):
         return [self.arbre, self.faits_initiaux, self.regles, self.arbre_advance]
@@ -80,16 +62,20 @@ class ResultValues():
             attributs.append(k)
         return attributs
 
-    def test_precision(self):
+    def test_precision(self, arbre=None, donnees=None):
         """
         :param: no parameters
         :return: return the precision percentage
         """
-        total = len(self.donnees_test)
+        if arbre is None:
+            arbre = self.arbre
+        if donnees is None:
+            donnees = self.donnees_test
+        total = len(donnees)
         # Extraction of class value for each subject
-        results = [d[0] for d in self.donnees_test]
+        results = [d[0] for d in donnees]
         # Prediction of each subject's class using the model
-        results_test = [self.arbre.classifie(d[1]) for d in self.donnees_test]
+        results_test = [arbre.classifie(d[1]) for d in donnees]
         # Precision calculation
         precision = 0
         if len(results) == len(results_test):
@@ -112,7 +98,6 @@ class ResultValues():
             for key, val in d.items():
                 fait.append(str(key) + "-" + str(val))
             faits_initiaux.append(fait)
-        print(faits_initiaux)
         return faits_initiaux
 
     def define_regles(self, noeud=None, premisse=[]):
@@ -150,7 +135,7 @@ class ResultValues():
     def process_example(self, example=None):
         """
         :param: prend un ensemble de faits initiaux
-        :return: retourne la règle qui a mené à la conclcusion si elle est présente dans l'ensemble de regles
+        :return: retourne la règle qui a menée à la conclcusion si elle est présente dans l'ensemble de regles
         retourne une liste vide si aucune regle n'a ete trouvee
         """
         if example is None:
@@ -160,14 +145,12 @@ class ResultValues():
                 # all() :  retourne true si toutes les propositions sont vraies
                 # verifie si les conditions/premisses d'une regle sont presentes dans un fait
                 if all(r in example for r in regle[0]):
-                    # print('1')
                     return regle
-            # print('0')
             return []
 
     def affiche_ccl(self, example=None):
         """
-        Méthode affichant la conclusion de l'exemple traité
+        Méthode affichant la conclusion de l'exemple traité par porcess_example()
         :param: prend une liste d'attribut correspondant à l'état d'un patient
         :return: affiche la conclusion et retourne la règle responsable / retourne une liste vide si aucun exemple n'est fourni
         ou qu'aucune règle n'a pu etre trouvée
@@ -186,7 +169,7 @@ class ResultValues():
             print("Le patient ne présente pas de risque de maladie car il rempli les conditions :", conclusion[0])
             return conclusion[0]
 
-    def diagnostique(self, example=None):
+    def diagnostic(self, example=None):
         """
         :param example: une liste correspondant aux caractéristiques d'un patient
         :return: retourne une liste  de listes de tuples comprenant (attribut-valeur, attribut-nouvelle_valeur).
@@ -213,7 +196,7 @@ class ResultValues():
                 if 'sex' in element:
                     sex = element
             if conclusion == '1':
-                # Isolation des regles avec une conclusion '1' les plus proches des premisses de l'exemple
+                # Isolation des regles avec une conclusion '0' les plus proches des premisses de l'exemple
                 predicats_positif = []
                 pre = premisses.copy()
                 pre.pop()
@@ -240,6 +223,7 @@ class ResultValues():
                 for p in predicats:
                     l = []
                     for att in self.attributs:
+                        # Pour ne pas prendre en consideration l'age et le sex
                         if att == 'sex' or att == 'age':
                             pass
                         else:
@@ -251,10 +235,10 @@ class ResultValues():
                     if len(l) > 0:
                         variables.append(l)
 
-                #print("Patient : ", premisses, example)
-                #print("VAR : ", variables)
-                #print("Liste des modifications")
+                # print("Patient : ", premisses, example)
+                # print("VAR : ", variables)
+                # print("Liste des modifications")
                 return variables
             elif conclusion == '0':
-                #print("La prédiction ne mène à aucune maladie")
+                # print("La prédiction ne mène à aucune maladie")
                 return []

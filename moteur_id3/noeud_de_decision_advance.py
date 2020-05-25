@@ -6,7 +6,7 @@ class NoeudDeDecisionAdvance:
     """
     niveaux = []
     nb_enfant = []
-    def __init__(self, attribut, donnees, p_class, enfants=None):
+    def __init__(self, attribut, valeur, donnees, p_class, enfants=None):
         """
             :param attribut: l'attribut de partitionnement du noeud (``None`` si\
             le noeud est un noeud terminal).
@@ -18,6 +18,7 @@ class NoeudDeDecisionAdvance:
         """
 
         self.attribut = attribut
+        self.valeur = valeur
         self.donnees = donnees
         self.enfants = enfants
         self.p_class = p_class
@@ -48,9 +49,15 @@ class NoeudDeDecisionAdvance:
         if self.terminal():
             rep += 'Alors {}'.format(self.classe().upper())
         else:
-            valeur = donnee[self.attribut]
-            enfant = self.enfants[valeur]
-            rep += 'Si {} = {}, '.format(self.attribut, valeur.upper())
+            valeur = float(donnee[self.attribut])
+            valeur_n = float(self.valeur)
+            cote = ""
+            if valeur < valeur_n:
+                cote = "Gauche"
+            elif valeur >= valeur_n:
+                cote = "Droite"
+            enfant = self.enfants[cote]
+            rep += 'Si {} = {}, '.format(self.attribut, self.valeur.upper())
             try:
                 rep += enfant.classifie(donnee)
             except:
@@ -77,10 +84,10 @@ class NoeudDeDecisionAdvance:
             self.nb_enfant.append(len(self.enfants) if self.enfants!= None else 0)
             for valeur, enfant in self.enfants.items():
                 rep += '---'*level
-                if valeur[0]=="Droite":
-                    rep += 'Si {} >= {}: \n'.format(self.attribut, valeur[1].upper())
-                elif valeur[0]=="Gauche":
-                    rep += 'Si {} < {}: \n'.format(self.attribut, valeur[1].upper())
+                if valeur=="Droite":
+                    rep += 'Si {} >= {}: \n'.format(self.attribut, self.valeur.upper())
+                elif valeur=="Gauche":
+                    rep += 'Si {} < {}: \n'.format(self.attribut, self.valeur.upper())
                 rep += enfant.repr_arbre(level+1)
         return rep
 
