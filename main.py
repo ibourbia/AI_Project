@@ -5,12 +5,12 @@ from moteur_id3.id3_advance import ID3Advance
 from moteur_id3.noeud_de_decision_advance import NoeudDeDecisionAdvance
 
 test = ResultValues()
-print("Arbre ID3")
-print(test.arbre)
-print("Profondeur maximale = ", max(NoeudDeDecision.niveaux))
-print("Profondeur moyenne = ", mean(NoeudDeDecision.niveaux))
-print("Nombre d'enfants moyen", mean(NoeudDeDecision.nb_enfant))
-print("Precision rate of the classification tree is : ", test.precision_rate, "%")
+# print("Arbre ID3")
+# print(test.arbre)
+# print("Profondeur maximale = ", max(NoeudDeDecision.niveaux))
+# print("Profondeur moyenne = ", mean(NoeudDeDecision.niveaux))
+# print("Nombre d'enfants moyen", mean(NoeudDeDecision.nb_enfant))
+# print("Precision rate of the classification tree is : ", test.precision_rate, "%")
 
 i = 0
 j = len(test.faits_initiaux)

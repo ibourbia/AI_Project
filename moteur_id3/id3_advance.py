@@ -26,8 +26,8 @@ class ID3Advance(ID3):
         else:
             # 1 : trouver l'attribut et sa valeur minimisant l'entropie
             attribut_optimal = self.attribut_optimal(donnees, attributs)
-            if attribut_optimal == attribut_optimal_recur:
-                return NoeudDeDecisionAdvance(None, None, donnees, str(predominant_class))
+            # if attribut_optimal == attribut_optimal_recur:
+            #     return NoeudDeDecisionAdvance(None, None, donnees, str(predominant_class))
 
             partitions_dict = self.partitionne(donnees, attribut_optimal[0], attributs[attribut_optimal[0]],
                                                attribut_optimal[1])
@@ -81,7 +81,6 @@ class ID3Advance(ID3):
                     entropie_minimale = entropie
                     valeur_partitionnement = value
             entropies_attributs.append((entropie_minimale, (attribut, valeur_partitionnement)))
-
         attribut_optimal = min(entropies_attributs, key=lambda h_c_a: h_c_a[0])[1]
 
         return attribut_optimal
